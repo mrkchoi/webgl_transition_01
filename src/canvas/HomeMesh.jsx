@@ -31,16 +31,30 @@ function HomeMesh({ image }) {
     return () => window.removeEventListener('mousemove', onMouseMove);
   }, []);
 
+  // useEffect(() => {
+  //   const handleScroll = () => {
+  //     console.log(
+  //       'meshRef.current.material.uniforms: ',
+  //       meshRef.current.material.uniforms
+  //     );
+  //     console.log('-------------------');
+  //   };
+
+  //   window.addEventListener('scroll', handleScroll);
+
+  //   return () => {
+  //     window.removeEventListener('scroll', handleScroll);
+  //   };
+  // }, []);
+
   useEffect(() => {
     if (meshRef.current) {
-      meshRef.current.material.uniforms.uImageSize.value.set(
+      meshRef.current.material.uniforms.uImageSize.value = new THREE.Vector2(
         element.naturalWidth,
         element.naturalHeight
       );
     }
   }, [element.naturalHeight, element.naturalWidth]);
-
-  useEffect(() => {}, [isTransition]);
 
   useFrame((state) => {
     const { clock } = state;
@@ -87,6 +101,8 @@ function HomeMesh({ image }) {
       mouseRef.current.current.x,
       mouseRef.current.current.y
     );
+
+    // console.log(clock.elapsedTime);
   });
 
   const handleMouseEnter = () => {
@@ -121,8 +137,8 @@ function HomeMesh({ image }) {
     };
   }, []);
 
-  const uniforms = useMemo(
-    () => ({
+  const uniforms = useMemo(() => {
+    const data = {
       uTexture: { value: textures[id] },
       uImageSize: {
         value: new THREE.Vector2(0, 0),
@@ -137,9 +153,11 @@ function HomeMesh({ image }) {
       uAlpha: { value: 1 },
       uMouse: { value: new THREE.Vector2(-1, -1) },
       uHovered: { value: 0 },
-    }),
-    [image.src]
-  );
+    };
+    console.log(data);
+    console.log('-------------------');
+    return data;
+  }, []);
 
   return (
     <>
@@ -149,7 +167,7 @@ function HomeMesh({ image }) {
           key={uuidv4()}
           uniforms={uniforms}
           transparent={true}
-          // side={THREE.DoubleSide}
+          side={THREE.DoubleSide}
           vertexShader={vertexDefault}
           fragmentShader={fragmentMask}
         />

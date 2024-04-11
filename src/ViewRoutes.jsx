@@ -16,13 +16,15 @@ function ViewRoutes() {
 
   return (
     <Routes>
-      <Route index path="/" element={<Home />} />
+      <Route key={location.pathname} index exact path="/" element={<Home />} />
       {DATA.map((item) => (
         <Route
           key={item.id}
+          exact
           path={`detail/${item.path}`}
           element={
             <Detail
+              key={item.id}
               title={item.title}
               description={item.description}
               image={item.image}

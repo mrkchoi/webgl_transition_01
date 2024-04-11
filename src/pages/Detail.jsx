@@ -15,12 +15,16 @@ function Detail({ title, description, image, id, path }) {
   } = useStore();
 
   useEffect(() => {
-    history.scrollRestoration = 'manual';
+    // history.scrollRestoration = 'manual';
     resetScroll();
   }, []);
 
   useEffect(() => {
     isTransition ? lockScroll(true) : lockScroll(false);
+
+    return () => {
+      lockScroll(false);
+    };
   }, [isTransition]);
 
   useEffect(() => {
@@ -52,7 +56,7 @@ function Detail({ title, description, image, id, path }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 1 }}
+      transition={{ duration: 1.5 }}
     >
       <div className="detail__itemWrapper">
         <div className="detail__textWrapper">

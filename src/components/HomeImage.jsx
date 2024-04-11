@@ -6,8 +6,13 @@ import { useNavigate } from 'react-router-dom';
 import { useStore } from '../App';
 
 function HomeImage({ item }) {
-  const { images, setImages, setTransitionImage, setIsTransition, textures } =
-    useStore();
+  const {
+    setHomeImages,
+    setDetailImages,
+    setTransitionImage,
+    setIsTransition,
+    textures,
+  } = useStore();
 
   const imageRef = useRef(null);
   const navigate = useNavigate();

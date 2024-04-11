@@ -3,9 +3,9 @@
   src: url('./assets/fonts/SuisseIntlM.woff2') format('woff2');
 }
 
-html {
+/* html {
   scroll-behavior: auto !important;
-}
+} */
 
 .main {
   --black: rgb(43, 43, 43);

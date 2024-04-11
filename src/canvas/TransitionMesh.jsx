@@ -58,7 +58,7 @@ function TransitionMesh() {
       });
 
       gsap.to(meshRef.current.material.uniforms.uProgress, {
-        value: 0,
+        value: 1,
         duration: 0.75,
       });
 
@@ -121,7 +121,7 @@ function TransitionMesh() {
         value: new THREE.Vector2(window.innerWidth, window.innerHeight),
       },
       uTime: { value: 0 },
-      uProgress: { value: 1 },
+      uProgress: { value: 0 },
     }),
     [image.src]
   );

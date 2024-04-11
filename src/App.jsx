@@ -1,8 +1,6 @@
 import React, { useEffect, useRef, useMemo, useState, Suspense } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
-import { Canvas } from '@react-three/fiber';
-import { PerspectiveCamera, OrthographicCamera } from '@react-three/drei';
 import * as THREE from 'three';
 
 import useSmoothScroll from './hooks/useSmoothScroll';
@@ -11,7 +9,7 @@ import { create } from 'zustand';
 
 import ViewRoutes from './ViewRoutes';
 import Header from './components/Header';
-import Scene from './canvas/Scene';
+import GLCanvas from './canvas/GLCanvas';
 
 import displacementMap from './assets/images/disp1.jpg';
 import './App.css';
@@ -36,13 +34,7 @@ export const useStore = create((set) => ({
   setResetScroll: (resetScroll) => set({ resetScroll }),
 }));
 
-const PERSPECTIVE = 1000;
-const FAR = PERSPECTIVE * 3;
-const FOV =
-  (180 * (2 * Math.atan(window.innerHeight / 2 / PERSPECTIVE))) / Math.PI;
-
 function App() {
-  const cameraRef = useRef(null);
   const scrollableRef = useRef(null);
   const { setTextures, setLockScroll, setResetScroll } = useStore();
 
@@ -57,56 +49,26 @@ function App() {
 
   useEffect(() => {
     // cache all WebGL textures
-    const textures = {};
-    // cache images
-    DATA.forEach((item) => {
-      const texture = new THREE.TextureLoader().load(item.image);
-      textures[item.id] = texture;
+    const inputTextures = [
+      ...DATA,
+      { id: 'displacement', image: displacementMap },
+    ];
+    const outputTextures = {};
+    // cache textures
+    inputTextures.forEach(({ id, image }) => {
+      const texture = new THREE.TextureLoader().load(image);
+      // texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+      outputTextures[id] = texture;
     });
-    // cache displacement map
-    textures['displacement'] = new THREE.TextureLoader().load(displacementMap);
-    setTextures(textures);
-  }, []);
-
-  useEffect(() => {
-    const handleResize = () => {
-      // update camera fov
-      cameraRef.current.aspect = window.innerWidth / window.innerHeight;
-      cameraRef.current.fov =
-        (180 * (2 * Math.atan(window.innerHeight / 2 / PERSPECTIVE))) / Math.PI;
-      cameraRef.current.updateProjectionMatrix();
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
+    setTextures(outputTextures);
   }, []);
 
   return (
     <BrowserRouter>
-      <AnimatePresence
-        onExitComplete={() => {
-          console.log('onExitComplete');
-        }}
-      >
+      <AnimatePresence>
         <main className="main">
           <div className="canvasWrapper">
-            <Canvas>
-              <PerspectiveCamera
-                ref={cameraRef}
-                makeDefault
-                position={[0, 0, PERSPECTIVE]}
-                zoom={1}
-                fov={FOV}
-                aspect={window.innerWidth / window.innerHeight}
-                near={0.01}
-                far={FAR}
-              />
-              <Suspense fallback={<span>loading...</span>}>
-                <Scene />
-              </Suspense>
-            </Canvas>
+            <GLCanvas />
           </div>
           <Header />
           <div ref={scrollableRef} className="scrollable">

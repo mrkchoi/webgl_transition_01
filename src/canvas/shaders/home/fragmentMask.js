@@ -103,10 +103,11 @@ const shader =
     vec2 mouse = -uMouse * 2.0;
 
     vec2 circlePos = uv + (mouse * 0.5);
-    float c = circle(circlePos * 0.55, min(0.1, uHovered), 0.9) * 1.9;
+    float c = circle(circlePos * 0.4, 0.1, 0.9) * 1.9;
+    // float c = circle(circlePos * 0.4, min(0.1, uHovered), 0.9) * 1.9;
 
-    float offX = uv.x - sin(uv.y + uTime * 0.01) + uTime * 0.02;
-    float offY = uv.y - uTime * 0.02 + sin(uTime * 0.01) * 0.05;
+    float offX = uv.x + sin(uv.y + uTime * 0.01) + uTime * 0.02;
+    float offY = uv.y - uTime * 0.02 - cos(uv.x + uTime * 0.01) * 0.05;
     vec2 uvOff = vec2(offX, offY);
 
     float n = cnoise(vec3(offX, offY, uTime * 0.001) * 30.0) - 0.4;
@@ -115,7 +116,7 @@ const shader =
     // finalMask = n * 1.4 + c * 1.1;
 
     vec4 image1 = texture2D(uTexture, uv);
-    vec4 image2 = texture2D(uTexture, uv + vec2(n, n) * 0.005);
+    vec4 image2 = texture2D(uTexture, uv + vec2(n, n) * 0.009);
     image2.r += 0.1;
     image2.g += 0.1;
     image2.b += 0.1;
