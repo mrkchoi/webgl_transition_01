@@ -1,8 +1,6 @@
 import React, { useEffect, useRef, useMemo, useState, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { PerspectiveCamera, OrthographicCamera } from '@react-three/drei';
-import { useLocation } from 'react-router-dom';
-import { v4 as uuidv4 } from 'uuid';
+import { PerspectiveCamera } from '@react-three/drei';
 
 import Scene from './Scene';
 
@@ -13,12 +11,6 @@ const FOV =
 
 function GLCanvas() {
   const cameraRef = useRef(null);
-  const { pathname } = useLocation();
-  const [key, setKey] = useState(uuidv4());
-
-  useEffect(() => {
-    setKey(uuidv4());
-  }, [pathname]);
 
   useEffect(() => {
     const handleResize = () => {

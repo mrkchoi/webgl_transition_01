@@ -45,6 +45,7 @@ function useSmoothScroll(props) {
   }, [container]);
 
   const resetScroll = () => {
+    history.scrollRestoration = 'manual';
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     scroll.current = 0;
     scroll.target = 0;

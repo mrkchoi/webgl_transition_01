@@ -5,8 +5,11 @@ import { useFrame } from '@react-three/fiber';
 import gsap from 'gsap';
 import { useStore } from '../App';
 import { lerp } from '../util/math';
+import { useLocation } from 'react-router-dom';
+import { useControls } from 'leva';
 
 import vertexDefault from './shaders/home/vertexDefault';
+import vertexDE from './shaders/home/vertexDE';
 import fragmentMask from './shaders/home/fragmentMask';
 
 function HomeMesh({ image }) {
@@ -17,9 +20,18 @@ function HomeMesh({ image }) {
     current: { x: 0, y: 0 },
     target: { x: 0, y: 0 },
   });
-
   const { textures, isTransition } = useStore();
   const { id, path, src, element } = image;
+
+  // const { progress, fadeOut, fadeOutDir, curviness, transition, backface } =
+  //   useControls({
+  //     progress: { value: 0, min: -1, max: 1 },
+  //     // fadeOut: { value: 0, min: -100, max: 100 },
+  //     // fadeOutDir: { value: 0, min: 0, max: 1, step: 1 },
+  //     // curviness: { value: 0, min: -100, max: 100 },
+  //     // transition: { value: 0, min: -100, max: 100 },
+  //     // backface: { value: 1, min: 0, max: 1, step: 1 },
+  //   });
 
   useEffect(() => {
     const onMouseMove = (e) => {
@@ -28,33 +40,24 @@ function HomeMesh({ image }) {
     };
 
     window.addEventListener('mousemove', onMouseMove);
-    return () => window.removeEventListener('mousemove', onMouseMove);
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove);
+    };
   }, []);
 
-  // useEffect(() => {
-  //   const handleScroll = () => {
-  //     console.log(
-  //       'meshRef.current.material.uniforms: ',
-  //       meshRef.current.material.uniforms
-  //     );
-  //     console.log('-------------------');
-  //   };
-
-  //   window.addEventListener('scroll', handleScroll);
-
-  //   return () => {
-  //     window.removeEventListener('scroll', handleScroll);
-  //   };
-  // }, []);
-
   useEffect(() => {
-    if (meshRef.current) {
-      meshRef.current.material.uniforms.uImageSize.value = new THREE.Vector2(
-        element.naturalWidth,
-        element.naturalHeight
-      );
+    if (isTransition) {
+      gsap.to(meshRef.current.material.uniforms.uAlpha, {
+        value: 0,
+        duration: 0.75,
+      });
+    } else {
+      gsap.to(meshRef.current.material.uniforms.uAlpha, {
+        value: 1,
+        duration: 0.75,
+      });
     }
-  }, [element.naturalHeight, element.naturalWidth]);
+  }, [isTransition]);
 
   useFrame((state) => {
     const { clock } = state;
@@ -64,6 +67,10 @@ function HomeMesh({ image }) {
     meshRef.current.position.y = -top + window.innerHeight / 2 - height / 2;
     meshRef.current.scale.x = width;
     meshRef.current.scale.y = height;
+    meshRef.current.material.uniforms.uPlaneSize.value.set(
+      meshRef.current.scale.x,
+      meshRef.current.scale.y
+    );
 
     mouseRef.current.current.x = lerp(
       mouseRef.current.current.x,
@@ -77,6 +84,24 @@ function HomeMesh({ image }) {
     );
 
     meshRef.current.material.uniforms.uTime.value = clock.elapsedTime;
+    // meshRef.current.material.uniforms.uFadeOut = fadeOut;
+    // meshRef.current.material.uniforms.uFadeOutDir = fadeOutDir;
+    // meshRef.current.material.uniforms.uProgress = progress;
+    // meshRef.current.material.uniforms.uCurviness = curviness;
+    // meshRef.current.material.uniforms.uTransition = transition;
+    // meshRef.current.material.uniforms.uBackFace = backface;
+
+    // console.log('uniforms: ', meshRef.current);
+
+    // if (
+    //   meshRef.current.material.uniforms.uImageSize.value.x !==
+    //   element.naturalWidth
+    // ) {
+    meshRef.current.material.uniforms.uImageSize.value = new THREE.Vector2(
+      element.naturalWidth,
+      element.naturalHeight
+    );
+    // }
 
     if (
       mouseRef.current.viewport.x > left &&
@@ -137,9 +162,10 @@ function HomeMesh({ image }) {
     };
   }, []);
 
-  const uniforms = useMemo(() => {
-    const data = {
+  const uniforms = useMemo(
+    () => ({
       uTexture: { value: textures[id] },
+      // uTexture2: { value: textures['texture2'] },
       uImageSize: {
         value: new THREE.Vector2(0, 0),
       },
@@ -150,14 +176,18 @@ function HomeMesh({ image }) {
         value: new THREE.Vector2(window.innerWidth, window.innerHeight),
       },
       uTime: { value: 0 },
-      uAlpha: { value: 1 },
+      uAlpha: { value: 0 },
       uMouse: { value: new THREE.Vector2(-1, -1) },
       uHovered: { value: 0 },
-    };
-    console.log(data);
-    console.log('-------------------');
-    return data;
-  }, []);
+      uFadeOut: { value: 0 },
+      uFadeOutDir: { value: 0 },
+      uProgress: { value: 0 },
+      uCurviness: { value: 0 },
+      uTransition: { value: 0 },
+      uBackFace: { value: 0 },
+    }),
+    []
+  );
 
   return (
     <>
@@ -168,7 +198,8 @@ function HomeMesh({ image }) {
           uniforms={uniforms}
           transparent={true}
           side={THREE.DoubleSide}
-          vertexShader={vertexDefault}
+          // vertexShader={vertexDefault}
+          vertexShader={vertexDE}
           fragmentShader={fragmentMask}
         />
       </mesh>

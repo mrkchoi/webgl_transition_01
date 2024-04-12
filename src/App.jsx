@@ -12,6 +12,8 @@ import Header from './components/Header';
 import GLCanvas from './canvas/GLCanvas';
 
 import displacementMap from './assets/images/disp1.jpg';
+import texture2 from './assets/images/img19.jpeg';
+
 import './App.css';
 
 import DATA from './data';
@@ -52,12 +54,12 @@ function App() {
     const inputTextures = [
       ...DATA,
       { id: 'displacement', image: displacementMap },
+      { id: 'texture2', image: texture2 },
     ];
     const outputTextures = {};
     // cache textures
     inputTextures.forEach(({ id, image }) => {
       const texture = new THREE.TextureLoader().load(image);
-      // texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
       outputTextures[id] = texture;
     });
     setTextures(outputTextures);

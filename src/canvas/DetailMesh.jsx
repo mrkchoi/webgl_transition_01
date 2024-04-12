@@ -5,24 +5,17 @@ import { useFrame } from '@react-three/fiber';
 import gsap from 'gsap';
 import { useStore } from '../App';
 import { useLocation } from 'react-router-dom';
+import { lerp } from '../util/math';
 
-import tVertexDefault from './shaders/tVertexDefault';
-import tVertexWave from './shaders/tVertexWave';
+// import vertexDefault from './shaders/detail/vertexDefault';
+import vertexWave from './shaders/detail/vertexWave';
+import fragmentDefault from './shaders/detail/fragmentDefault';
 
 function DetailMesh({ image }) {
   const meshRef = useRef(null);
   const { textures, isTransition } = useStore();
   const { id, path, src, element } = image;
-  const { pathname } = useLocation();
-
-  useEffect(() => {
-    if (meshRef.current) {
-      meshRef.current.material.uniforms.uImageSize.value.set(
-        element.naturalWidth,
-        element.naturalHeight
-      );
-    }
-  }, [element.naturalHeight, element.naturalWidth]);
+  // const { pathname } = useLocation();
 
   useFrame((state) => {
     const { clock } = state;
@@ -34,6 +27,15 @@ function DetailMesh({ image }) {
     meshRef.current.scale.y = height;
 
     meshRef.current.material.uniforms.uTime.value = clock.elapsedTime;
+    // if (
+    //   meshRef.current.material.uniforms.uImageSize.value.x !==
+    //   element.naturalWidth
+    // ) {
+    meshRef.current.material.uniforms.uImageSize.value.set(
+      element.naturalWidth,
+      element.naturalHeight
+    );
+    // }
   });
 
   useEffect(() => {
@@ -68,7 +70,7 @@ function DetailMesh({ image }) {
       },
       uTime: { value: 0 },
       uAlpha: { value: 1 },
-      uProgress: { value: 0 },
+      uMouse: { value: new THREE.Vector2(-1, -1) },
     }),
     [image.src]
   );
@@ -82,23 +84,8 @@ function DetailMesh({ image }) {
           uniforms={uniforms}
           transparent={true}
           // side={THREE.DoubleSide}
-          vertexShader={tVertexWave}
-          fragmentShader={
-            /* GLSL */
-            `
-            uniform sampler2D uTexture;
-            uniform float uAlpha;
-
-            varying vec2 vUv;
-
-            void main() {
-              vec2 uv = vUv;
-
-              vec3 color = texture2D(uTexture, uv).rgb;
-              gl_FragColor = vec4(color, uAlpha);
-            }
-          `
-          }
+          vertexShader={vertexWave}
+          fragmentShader={fragmentDefault}
         />
       </mesh>
     </>

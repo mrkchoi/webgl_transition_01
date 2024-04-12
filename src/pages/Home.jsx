@@ -1,25 +1,20 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import * as THREE from 'three';
 
 import DATA from '../data';
 import { useStore } from '../App';
 import HomeImage from '../components/HomeImage';
 
 function Home() {
-  const imageRef = useRef(null);
   const {
-    homeImages,
     setHomeImages,
     setTransitionImage,
     setIsTransition,
-    textures,
     resetScroll,
     lockScroll,
   } = useStore();
 
   useEffect(() => {
-    history.scrollRestoration = 'manual';
     resetScroll();
   }, []);
 

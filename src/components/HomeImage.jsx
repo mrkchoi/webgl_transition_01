@@ -1,18 +1,10 @@
-import React, { useEffect, useRef } from 'react';
-
-import * as THREE from 'three';
+import React, { useRef } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../App';
 
 function HomeImage({ item }) {
-  const {
-    setHomeImages,
-    setDetailImages,
-    setTransitionImage,
-    setIsTransition,
-    textures,
-  } = useStore();
+  const { setTransitionImage, setIsTransition } = useStore();
 
   const imageRef = useRef(null);
   const navigate = useNavigate();
@@ -29,9 +21,7 @@ function HomeImage({ item }) {
               id: item.id,
               path: item.path,
               src: item.image,
-              // from: imageRef.current,
               element: imageRef.current,
-              // texture: textures[item.id],
               bounds: {
                 width: bounds.width,
                 height: bounds.height,

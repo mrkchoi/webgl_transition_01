@@ -3,15 +3,24 @@ import { v4 as uuidv4 } from 'uuid';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import gsap from 'gsap';
+// import { useControls } from 'leva';
 
 import { useStore } from '../App';
 
-import tVertexDefault from './shaders/tVertexDefault';
-import tVertexWave from './shaders/tVertexWave';
-import tFragmentBubble from './shaders/tFragmentBubble';
-import tFragmentBubbleSide from './shaders/tFragmentBubbleSide';
-import tFragmentAir from './shaders/tFragmentAir';
-import tFragmentNoise from './shaders/tFragmentNoise';
+import vertexDefault from './shaders/transition/vertexDefault';
+import vertexWave from './shaders/transition/vertexWave';
+import vertexJerez from './shaders/transition/vertexJerez';
+import vertexJerezWave from './shaders/transition/vertexJerezWave';
+import vertexDE from './shaders/transition/vertexDE';
+import vertexDEY from './shaders/transition/vertexDEY';
+
+import fragmentDefault from './shaders/transition/fragmentDefault';
+import fragmentBubble from './shaders/transition/fragmentBubble';
+import fragmentBubbleSide from './shaders/transition/fragmentBubbleSide';
+import fragmentAir from './shaders/transition/fragmentAir';
+import fragmentNoise from './shaders/transition/fragmentNoise';
+
+const DURATION = 1;
 
 function TransitionMesh() {
   const {
@@ -23,9 +32,52 @@ function TransitionMesh() {
     lockScroll,
   } = useStore();
 
+  // const { progress, fadeOut, fadeOutDir, curviness, transition, backFace } =
+  //   useControls({
+  //     progress: {
+  //       value: 0,
+  //       min: -1,
+  //       max: 1,
+  //     },
+  //     fadeOut: {
+  //       value: 0,
+  //       min: -1,
+  //       max: 1,
+  //     },
+  //     fadeOutDir: {
+  //       value: 0,
+  //       min: 0,
+  //       max: 1,
+  //       step: 1,
+  //     },
+  //     curviness: {
+  //       value: 0,
+  //       min: -10,
+  //       max: 10,
+  //     },
+  //     transition: {
+  //       value: 0,
+  //       min: -1,
+  //       max: 1,
+  //     },
+  //     backFace: {
+  //       value: 1,
+  //       min: 0,
+  //       max: 1,
+  //       step: 1,
+  //     },
+  //   });
+
   const meshRef = useRef(null);
+  const isAnimateTransition = useRef(true);
   const { id, path, src, element, bounds } = image[0];
   const boundsRef = useRef(bounds);
+
+  const convertNorm = (progress) => {
+    const increasingNorm = progress * 500;
+    const decreasingNorm = (1 - progress) * 500;
+    return progress <= 0.5 ? increasingNorm : decreasingNorm;
+  };
 
   useEffect(() => {
     const img = new Image();
@@ -45,32 +97,62 @@ function TransitionMesh() {
     const { clock } = state;
 
     const detailImage = document.querySelector(`.detail__img[data-id="${id}"]`);
+    const finalBounds = detailImage?.getBoundingClientRect();
 
-    if (detailImage && isTransition) {
-      const finalBounds = detailImage.getBoundingClientRect();
-
+    if (detailImage && isTransition && isAnimateTransition.current) {
       gsap.to(boundsRef.current, {
         width: finalBounds.width,
         height: finalBounds.height,
         top: finalBounds.top,
         left: finalBounds.left,
-        duration: 0.75,
+        duration: DURATION,
       });
 
-      gsap.to(meshRef.current.material.uniforms.uProgress, {
+      const tl = gsap.timeline({});
+      tl.set(meshRef.current.material.uniforms.uCurviness, {
+        // value: 0.5,
+        value: -0.5,
+      });
+      tl.set(meshRef.current.material.uniforms.uBackFace, {
         value: 1,
-        duration: 0.75,
       });
-
-      if (
-        Math.abs(boundsRef.current.width - finalBounds.width) < 1 &&
-        Math.abs(boundsRef.current.height - finalBounds.height) < 1 &&
-        Math.abs(boundsRef.current.top - finalBounds.top) < 1 &&
-        Math.abs(boundsRef.current.left - finalBounds.left) < 1
-      ) {
-        setIsTransition(false);
-        setTransitionImage([]);
-      }
+      tl.to(
+        meshRef.current.material.uniforms.uProgress,
+        {
+          value: 1,
+          duration: DURATION,
+        },
+        '<'
+      );
+      tl.to(
+        meshRef.current.material.uniforms.uCurviness,
+        {
+          value: 0,
+          duration: DURATION,
+        },
+        '<'
+      );
+      tl.to(meshRef.current.material.uniforms.uCurviness, {
+        value: 0,
+        duration: DURATION / 2,
+      });
+      // meshRef.current.material.uniforms.uProgress.value = progress;
+      // meshRef.current.material.uniforms.uFadeOut.value = fadeOut;
+      // meshRef.current.material.uniforms.uFadeOutDir.value = fadeOutDir;
+      // meshRef.current.material.uniforms.uCurviness.value = curviness;
+      // meshRef.current.material.uniforms.uTransition.value = transition;
+      // meshRef.current.material.uniforms.uBackFace.value = backFace;
+      isAnimateTransition.current = false;
+    }
+    if (
+      Math.abs(boundsRef.current.width - finalBounds.width) < 1 &&
+      Math.abs(boundsRef.current.height - finalBounds.height) < 1 &&
+      Math.abs(boundsRef.current.top - finalBounds.top) < 1 &&
+      Math.abs(boundsRef.current.left - finalBounds.left) < 1 &&
+      isTransition
+    ) {
+      setIsTransition(false);
+      setTransitionImage([]);
     }
 
     meshRef.current.position.x =
@@ -108,6 +190,7 @@ function TransitionMesh() {
   const uniforms = useMemo(
     () => ({
       uTexture: { value: textures[id] },
+      // uTexture: { value: textures['texture2'] },
       uDisplacement: {
         value: textures['displacement'],
       },
@@ -122,6 +205,11 @@ function TransitionMesh() {
       },
       uTime: { value: 0 },
       uProgress: { value: 0 },
+      uFadeOut: { value: 0 },
+      uFadeOutDir: { value: 0 },
+      uCurviness: { value: 0 },
+      uTransition: { value: 0 },
+      uBackFace: { value: 0 },
     }),
     [image.src]
   );
@@ -134,10 +222,13 @@ function TransitionMesh() {
           key={uuidv4()}
           uniforms={uniforms}
           transparent={true}
-          // side={THREE.DoubleSide}
-          // vertexShader={tVertexWave}
-          vertexShader={tVertexDefault}
-          fragmentShader={tFragmentNoise}
+          side={THREE.DoubleSide}
+          // vertexShader={vertexDEY}
+          vertexShader={id % 2 === 0 ? vertexDEY : vertexDE}
+          fragmentShader={fragmentDefault}
+          // fragmentShader={fragmentNoise}
+          depthWrite={false}
+          depthTest={false}
         />
       </mesh>
     </>

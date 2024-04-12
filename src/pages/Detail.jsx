@@ -1,21 +1,11 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useStore } from '../App';
-import * as THREE from 'three';
 
 function Detail({ title, description, image, id, path }) {
-  const {
-    detailImages,
-    setDetailImages,
-    transitionImage,
-    textures,
-    resetScroll,
-    isTransition,
-    lockScroll,
-  } = useStore();
+  const { setDetailImages, resetScroll, isTransition, lockScroll } = useStore();
 
   useEffect(() => {
-    // history.scrollRestoration = 'manual';
     resetScroll();
   }, []);
 

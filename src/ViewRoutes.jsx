@@ -1,19 +1,10 @@
 import { Routes, Route } from 'react-router-dom';
-
 import Home from './pages/Home';
 import Detail from './pages/Detail';
 
 import DATA from './data';
-import { useStore } from './App';
-import { useEffect } from 'react';
 
 function ViewRoutes() {
-  const { textures } = useStore();
-
-  // useEffect(() => {
-  //   console.log(textures);
-  // }, [textures]);
-
   return (
     <Routes>
       <Route key={location.pathname} index exact path="/" element={<Home />} />

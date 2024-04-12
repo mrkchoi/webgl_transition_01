@@ -3,9 +3,12 @@ const shader =
   `
   uniform float uTime;
   uniform vec2 uMouse;
+  uniform float uAlpha;
   uniform sampler2D uTexture;
+  // uniform sampler2D uTexture2;
   uniform vec2 uImageSize;
   uniform float uHovered;
+  uniform float uProgress;
 
   varying vec2 vUv;
 
@@ -86,7 +89,6 @@ const shader =
 
   float circle(in vec2 _st, in float _radius, in float blurriness){
     float aspect = uImageSize.x / uImageSize.y;
-    // vec2 dist = vec2(_st.x, _st.y);
 
     vec2 dist = vec2(_st.x * aspect, _st.y);
 
@@ -117,13 +119,18 @@ const shader =
 
     vec4 image1 = texture2D(uTexture, uv);
     vec4 image2 = texture2D(uTexture, uv + vec2(n, n) * 0.009);
+    // image2.r += 1.0;
+    // image2.g += 1.0;
+    // image2.b += 1.0;
     image2.r += 0.1;
     image2.g += 0.1;
     image2.b += 0.1;
 
     vec4 finalImage = mix(image1, image2, min(finalMask, uHovered));
+    // vec4 finalImage = mix(image1, image2, uProgress);
 
-    gl_FragColor = finalImage;
+    gl_FragColor = vec4(finalImage.rgb, uAlpha * finalImage.a);
+    // gl_FragColor = finalImage;
   }
 `;
 
